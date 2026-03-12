@@ -1,0 +1,32 @@
+(*Function to calculate d3 for a given sample size n*)
+d3[n_Integer] := 
+ Module[{pdf, meanRange, 
+   meanSquaredRange},(*Define the PDF of the range for standard \
+normal samples*)
+  pdf[w_] := 
+   n*(n - 1)*
+    NIntegrate[(CDF[NormalDistribution[0, 1], x] - 
+         CDF[NormalDistribution[0, 1], x - w])^(n - 2)*
+      PDF[NormalDistribution[0, 1], x - w]*
+      PDF[NormalDistribution[0, 1], x], {x, -Infinity, Infinity}, 
+     Method -> "GlobalAdaptive", PrecisionGoal -> 17];
+  (*Calculate E[R]=d2*)
+  meanRange = 
+   NIntegrate[w*pdf[w], {w, 0, Infinity}, Method -> "GlobalAdaptive", 
+    PrecisionGoal -> 17];
+  (*Calculate E[R^2]*)
+  meanSquaredRange = 
+   NIntegrate[w^2*pdf[w], {w, 0, Infinity}, 
+    Method -> "GlobalAdaptive", PrecisionGoal -> 17];
+  (*d3=Sqrt[E[R^2]-(E[R])^2]*)Sqrt[meanSquaredRange - meanRange^2]]
+
+
+d3[2] = 0.8525024664274208
+d3[3] = 0.8883680040452026
+d3[4] = 0.8798082028249792
+d3[5] = 0.8640819410994990
+d3[6] = 0.8480396861174856
+d3[7] = 0.8332053356222855
+d3[8] = 0.8198314897919312
+d3[9] = 0.8078342745533086
+d3[10] = 0.7970506735193996
