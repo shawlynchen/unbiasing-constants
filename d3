@@ -220,3 +220,66 @@ d3[197] = 0.5667754247583422
 d3[198] = 0.5665127723453777
 d3[199] = 0.5662517712458187
 d3[200] = 0.5659924027063215
+d3[201] = 0.5657346482796743
+d3[202] = 0.5654784898182563
+d3[203] = 0.5652239094675471
+d3[204] = 0.5649708896605147
+
+d3(n) values calculated using matlab online where n ≥ 205:
+
+```
+function d3_value = d3(n)
+    % Function to calculate d3 for a given sample size n
+    % d3 = standard deviation of the range for standard normal samples
+    
+    % Define the PDF of the range for standard normal samples
+    pdf_func = @(w) range_pdf(w, n);
+    
+    % Calculate E[R] = d2
+    meanRange = integral(@(w) w .* pdf_func(w), 0, Inf, ...
+        'ArrayValued', true, 'RelTol', 1e-18, 'AbsTol', 1e-18);
+    
+    % Calculate E[R^2]
+    meanSquaredRange = integral(@(w) w.^2 .* pdf_func(w), 0, Inf, ...
+        'ArrayValued', true, 'RelTol', 1e-18, 'AbsTol', 1e-18);
+    
+    % d3 = sqrt(E[R^2] - (E[R])^2)
+    d3_value = sqrt(meanSquaredRange - meanRange^2);
+end
+
+function pdf_value = range_pdf(w, n)
+    % PDF of the range for standard normal samples
+    % This function handles the inner integral for the range PDF
+    
+    % If w is negative or zero, PDF is 0
+    if w <= 0
+        pdf_value = 0;
+        return;
+    end
+    
+    % Define the integrand for the inner integral
+    integrand = @(x) range_pdf_integrand(x, w, n);
+    
+    % Perform the inner integration
+    inner_integral = integral(integrand, -Inf, Inf, ...
+        'RelTol', 1e-18, 'AbsTol', 1e-18);
+    
+    % Multiply by n*(n-1)
+    pdf_value = n * (n - 1) * inner_integral;
+end
+
+function integrand_value = range_pdf_integrand(x, w, n)
+    % Integrand for the range PDF calculation
+    % Uses standard normal CDF and PDF
+    
+    % Standard normal PDF and CDF
+    pdf_x = (1/sqrt(2*pi)) * exp(-x.^2/2);
+    pdf_x_minus_w = (1/sqrt(2*pi)) * exp(-(x-w).^2/2);
+    
+    cdf_x = 0.5 * (1 + erf(x/sqrt(2)));
+    cdf_x_minus_w = 0.5 * (1 + erf((x-w)/sqrt(2)));
+    
+    % Compute the integrand
+    integrand_value = (cdf_x - cdf_x_minus_w).^(n-2) .* pdf_x_minus_w .* pdf_x;
+end
+```
